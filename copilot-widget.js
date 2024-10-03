@@ -1,115 +1,62 @@
 (function() {
-  let profileIconMmid = null; // Variable to store the mmid of the profile icon
+  console.log('Script execution started');
+  
+  try {
+    let profileIconMmid = null;
 
-  // Function to inject mmid and aria-keyshortcuts into all DOM elements
-  function injectMmidAttributes() {
-    const allElements = document.querySelectorAll('*');
-    let id = 0;
-
-    // Iterate over all DOM elements and inject mmid
-    allElements.forEach((element) => {
-      const origAriaAttribute = element.getAttribute('aria-keyshortcuts');
-      const mmid = \`\${++id}\`;
-
-      // Inject mmid and aria-keyshortcuts attributes
-      element.setAttribute('mmid', mmid);
-      element.setAttribute('aria-keyshortcuts', mmid);
-
-      // Rename the existing aria-keyshortcuts attribute if it exists
-      if (origAriaAttribute) {
-        element.setAttribute('orig-aria-keyshortcuts', origAriaAttribute);
-      }
-    });
-
-    console.log(\`Added MMID to \${id} elements\`);
-  }
-
-  // Function to send DOM elements to the server and fetch the profile icon's mmid
-  async function fetchProfileMmid() {
-    injectMmidAttributes(); // Ensure mmid is injected into the DOM before making the request
-
-    const allElements = document.querySelectorAll('*');
-    const elementsArray = [];
-
-    // Collect the attributes of each DOM element
-    allElements.forEach((element) => {
-      elementsArray.push({
-        tag: element.tagName,
-        attributes: {
-          'aria-label': element.getAttribute('aria-label') || null,
-          id: element.id || null,
-          class: element.className || null,
-        },
-        mmid: element.getAttribute('mmid'), // Send the mmid we injected earlier
+    // Inject mmid attributes
+    function injectMmidAttributes() {
+      console.log('Injecting mmid attributes...');
+      const allElements = document.querySelectorAll('*');
+      let id = 0;
+      
+      allElements.forEach((element) => {
+        const mmid = `${++id}`;
+        element.setAttribute('mmid', mmid);
+        element.setAttribute('aria-keyshortcuts', mmid);
       });
-    });
-
-    try {
-      // Make the POST request to the server
-      const response = await fetch('https://b9ea-49-205-35-51.ngrok-free.app/get-mmid', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ elements: elementsArray }),
-      });
-
-      const data = await response.json();
-      profileIconMmid = data.mmid; // Get the mmid for the profile icon from the server response
-      console.log('Profile icon mmid received from server:', profileIconMmid);
-
-      // Alert for the fetched mmid
-      alert('Fetched profile icon mmid: ' + profileIconMmid);
-    } catch (error) {
-      console.error('Error fetching profile mmid:', error);
-      alert('Failed to fetch profile icon mmid.');
+      
+      console.log(`Added MMID to ${id} elements`);
     }
+
+    // Create UI buttons
+    function createButtons() {
+      console.log('Creating UI buttons...');
+      
+      const fetchMmidButton = document.createElement('button');
+      fetchMmidButton.innerText = 'Fetch Profile MMID';
+      fetchMmidButton.style.position = 'fixed';
+      fetchMmidButton.style.bottom = '50px';
+      fetchMmidButton.style.right = '10px';
+      fetchMmidButton.style.padding = '10px';
+      fetchMmidButton.style.backgroundColor = '#4CAF50';
+      fetchMmidButton.style.color = '#fff';
+      fetchMmidButton.style.border = 'none';
+      fetchMmidButton.style.zIndex = '9999';
+      
+      const clickButton = document.createElement('button');
+      clickButton.innerText = 'Click Profile Icon';
+      clickButton.style.position = 'fixed';
+      clickButton.style.bottom = '10px';
+      clickButton.style.right = '10px';
+      clickButton.style.padding = '10px';
+      clickButton.style.backgroundColor = '#008CBA';
+      clickButton.style.color = '#fff';
+      clickButton.style.border = 'none';
+      clickButton.style.zIndex = '9999';
+      
+      document.body.appendChild(fetchMmidButton);
+      document.body.appendChild(clickButton);
+      
+      console.log('Buttons created successfully');
+    }
+
+    // Initialize
+    injectMmidAttributes();
+    createButtons();
+    
+    console.log('Script execution completed successfully');
+  } catch (error) {
+    console.error('Script execution failed:', error);
   }
-
-  // Function to simulate a click on the profile icon using the mmid received from the server
-  function clickProfileIcon() {
-    if (!profileIconMmid) {
-      alert('Profile icon mmid not available! Fetch the mmid first.');
-      return;
-    }
-
-    // Use the mmid returned from the server to find the profile icon
-    const profileIcon = document.querySelector(\`button[mmid="\${profileIconMmid}"]\`);
-
-    if (profileIcon) {
-      profileIcon.click(); // Simulate a click
-      console.log('Profile icon clicked!');
-      alert('Profile icon clicked!');
-    } else {
-      console.log('Profile icon not found!');
-      alert('Profile icon not found!');
-    }
-  }
-
-  // Create the button to fetch the profile mmid from the server
-  const fetchMmidButton = document.createElement('button');
-  fetchMmidButton.innerText = 'Fetch Profile MMID';
-  fetchMmidButton.style.position = 'fixed';
-  fetchMmidButton.style.bottom = '50px';
-  fetchMmidButton.style.right = '10px';
-  fetchMmidButton.style.padding = '10px';
-  fetchMmidButton.style.zIndex = '9999';
-
-  fetchMmidButton.addEventListener('click', async () => {
-    await fetchProfileMmid(); // Fetch the mmid from the server on button click
-  });
-
-  // Create the button to click the profile icon
-  const clickButton = document.createElement('button');
-  clickButton.innerText = 'Click Profile Icon';
-  clickButton.style.position = 'fixed';
-  clickButton.style.bottom = '10px';
-  clickButton.style.right = '10px';
-  clickButton.style.padding = '10px';
-  clickButton.style.zIndex = '9999';
-
-  clickButton.addEventListener('click', clickProfileIcon); // Click profile icon on button click
-
-  document.body.appendChild(fetchMmidButton); // Append the fetch mmid button
-  document.body.appendChild(clickButton); // Append the click button
 })();
